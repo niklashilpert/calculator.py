@@ -87,7 +87,7 @@ def _format_calculation(calc: str) -> str | None:
         calc = f_calc
 
     calc = _insert_brackets_at_double_ops(calc)
-    calc = _insert_power_number_brackets(calc)
+    calc = _insert_power_brackets(calc)
     calc = calc.replace(")(", ")*(")  # Makes it possible to write (3-2)(3+2) without a * in the middle
 
     # Makes it possible to write 3(4+2) instead of 3*(4+2)
@@ -112,7 +112,7 @@ def _insert_brackets_at_double_ops(calc) -> str:
 
     return calc
 
-def _insert_power_number_brackets(calc: str) -> str:
+def _insert_power_brackets(calc: str) -> str:
 
     # Handles the case where the exponent has to be applied to the base with a sign that should be ignored
     # Example: -2^4 is not 16 but -16
