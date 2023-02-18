@@ -86,10 +86,12 @@ def _format_calculation(calc: str) -> str | None:
         calc = f_calc
 
     calc = _insert_brackets_at_double_ops(calc)
-
     calc = _add_power_number_brackets(calc)
+    calc = calc.replace(")(", ")*(")  # Makes it possible to write (3-2)(3+2) without a * in the middle
 
-    calc = calc.replace(")(", ")*(")
+    # Makes it possible to write 3(4+2) instead of 3*(4+2)
+    for c in _allowed_nums:
+        calc = calc.replace(str(c) + "(", str(c) + "*(")
 
     return calc
 
@@ -190,16 +192,14 @@ def _parse_calculation(calc: str) -> Brackets | None:
 
     # Parses the calculation into a Bracket object
 
-    root, i = _parse_brackets(f"({calc})", "+", 1)
+    root, i = _next_brackets(f"({calc})", "+", 1)
     return root
 
-
-def _parse_brackets(calc: str, op: str, start: int) -> (Brackets | None, int | None):
+def _next_brackets(calc: str, op: str, start: int) -> (Brackets | None, int | None):
     if start >= len(calc):
         return None, None
     if not is_calculation(calc):
         return None, None
-
 
     # Creates the root brackets object
     root = Brackets(op, [])
@@ -216,7 +216,7 @@ def _parse_brackets(calc: str, op: str, start: int) -> (Brackets | None, int | N
         # and jumps to the returned index to skip them
         # Adds the returned brackets object to root's elements list
         if calc[i] == "(":
-            bracket, new_i = _parse_brackets(calc, current_op, i + 1)
+            bracket, new_i = _next_brackets(calc, current_op, i + 1)
             root.elements.append(bracket)
             i = new_i
 
