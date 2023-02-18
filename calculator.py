@@ -17,7 +17,8 @@ _illegal_strs = (
     ".(", ".)", ".+", ".-", ".*", "./", ".^"  # when a number ends on a dot (which it shouldn't)
 )
 
-# ==== VALIDATAION ====
+
+# ==== CHECKING ====
 def is_calculation(calc: str):
     """
     Returns True if the provided string can be interpreted.
@@ -111,6 +112,27 @@ def _insert_brackets_at_double_ops(calc) -> str:
 
     return calc
 
+def _add_power_number_brackets(calc: str) -> str:
+
+    # Handles the case where the exponent has to be applied to the base with a sign that should be ignored
+    # Example: -2^4 is not 16 but -16
+    # Solution: Inserts brackets after the sign of the base and after the exponent
+    # Example: -2^4 -> -(2^4) => -2^4 = -16
+
+    for i in range(0, len(calc)):
+        if calc[i] == "^":
+            start_index = _find_left_boundary(calc, i-1)
+            end_index = _find_right_boundary(calc, i+1)
+
+            first_part = calc[:start_index+1]
+            base = calc[start_index+1:i]
+            exponent = calc[i+1:end_index]
+            last_part = calc[end_index:]
+
+            calc = f"{first_part}({base}#{exponent}){last_part}"  # Replaces ^ with # to avoid infinite loop
+
+    return calc.replace("#", "^")
+
 def _find_right_boundary(calc: str, i: int) -> int:
     if i not in range(0, len(calc)):
         return -1
@@ -162,28 +184,6 @@ def _find_left_boundary(calc: str, i: int) -> int:
                 level -= 1
             i -= 1
     return i
-
-# -3^5 -> -(3^5)
-def _add_power_number_brackets(calc: str) -> str:
-
-    # Handles the case where the exponent has to be applied to the base with a sign that should be ignored
-    # Example: -2^4 is not 16 but -16
-    # Solution: Inserts brackets after the sign of the base and after the exponent
-    # Example: -2^4 -> -(2^4) => -2^4 = -16
-
-    for i in range(0, len(calc)):
-        if calc[i] == "^":
-            start_index = _find_left_boundary(calc, i-1)
-            end_index = _find_right_boundary(calc, i+1)
-
-            first_part = calc[:start_index+1]
-            base = calc[start_index+1:i]
-            exponent = calc[i+1:end_index]
-            last_part = calc[end_index:]
-
-            calc = f"{first_part}({base}#{exponent}){last_part}"  # Replaces ^ with # to avoid infinite loop
-
-    return calc.replace("#", "^")
 
 
 # ==== PARSER ====
